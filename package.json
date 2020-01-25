@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
+    "devStart": "nodemon server.js",
     "pretty": "prettier --write \"**/*.{js,json}\""
   },
   "keywords": [],
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "axios-mock-adapter": "^1.17.0",
+    "nodemon": "^2.0.2",
     "prettier": "^1.19.1"
   }
 }
