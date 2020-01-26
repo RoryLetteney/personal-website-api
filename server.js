@@ -8,7 +8,7 @@ const swaggerUI = require("swagger-ui-express");
 const swaggerJSDoc = require("swagger-jsdoc");
 
 // SETUP
-const app = express();
+const app = (module.exports = express());
 const PORT = process.env.PORT || 3300;
 const swaggerDefinition = {
   info: {
