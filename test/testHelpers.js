@@ -6,19 +6,20 @@ const database = require("../database");
 module.exports = {
   tags: {
     cleanup: {
-      create: async () => {
+      create: async id => {
         const client = await database.connect();
 
         const query = `
           DELETE FROM tags
-          WHERE name = 'test-tag'
+          WHERE id = $1
         `;
+        const values = [id];
 
         return client
-          .query(query)
+          .query(query, values)
           .then(() => {
             client.release();
-            Promise.resolve();
+            return Promise.resolve();
           })
           .catch(err => {
             client.release();

@@ -10,8 +10,7 @@ describe("tags-routes", () => {
   let createdTagId;
 
   after(async () => {
-    await testHelpers.tags.cleanup.update(createdTagId);
-    return testHelpers.tags.cleanup.create();
+    return testHelpers.tags.cleanup.create(createdTagId);
   });
 
   describe("POST /api/tags", () => {
@@ -110,10 +109,28 @@ describe("tags-routes", () => {
         });
     });
 
+    it("should return status 400 when no id sent", () => {
+      return request
+        .put(`/api/tags`)
+        .send({ name: "test-tag-update" })
+        .expect(400)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response).to.be.an("object");
+          expect(response)
+            .to.have.own.property("status")
+            .and.to.equal(400);
+          expect(response).to.have.own.property("message");
+        });
+    });
+
     it("should return status 404 when the tag to update is not found", () => {
       return request
         .put("/api/tags/0")
-        .send({ name: "test-tag" })
+        .send({ name: "test-tag-update" })
         .expect(404)
         .expect(res => {
           expect(res.text).to.be.a("string");

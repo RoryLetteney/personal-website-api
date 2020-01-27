@@ -98,3 +98,53 @@ router.get("/api/tags", (req, res, next) => {
     .then(results => res.send(JSON.stringify(results)))
     .catch(next);
 });
+
+/**
+ * @swagger
+ * /api/tags/:id
+ *   put:
+ *     tags:
+ *       - tags
+ *     produces:
+ *       - application/json
+ *     description: Update the name of the specified tag
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: ID of tag
+ *         required: true
+ *         type: integer
+ *       - name: body
+ *         in: body
+ *         description: holds new name value
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               required: true
+ *     responses:
+ *       200:
+ *         description: success response
+ *         schema:
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/tags'
+ *       400:
+ *         description: bad request
+ *         schema:
+ *           $ref: '#/definitions/error'
+ *       404:
+ *         description: tag doesn't exist
+ *         schema:
+ *           $ref: '#/definitions/error'
+ *
+ */
+
+router.put("/api/tags/:id", jsonParser, (req, res, next) => {
+  req.body.id = req.params.id;
+  return tags
+    .update(req.body)
+    .then(results => res.send(JSON.stringify(results)))
+    .catch(next);
+});
