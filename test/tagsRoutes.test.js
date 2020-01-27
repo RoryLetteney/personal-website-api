@@ -18,10 +18,33 @@ describe("tags-routes", () => {
         .send({ name: "test-tag" })
         .expect(200)
         .expect(res => {
-          expect(typeof res.text).to.be.a("string");
-          expect(JSON.parse(res.text)).to.be.an("array");
-          expect(JSON.parse(res.text)[0]).to.have.own.property("id");
-          expect(JSON.parse(res.text)[0]).to.have.own.property("name");
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response).to.be.an("array");
+          expect(response[0]).to.be.an("object");
+          expect(response[0]).to.have.own.property("id");
+          expect(response[0]).to.have.own.property("name");
+        });
+    });
+
+    it("should return status 400 and helpful message when no name sent", () => {
+      return request
+        .post("/api/tags")
+        .send({})
+        .expect(400)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response).to.be.an("object");
+          expect(response).to.have.own.property("error");
+          expect(response.error)
+            .to.have.own.property("status")
+            .and.to.equal(400);
+          expect(response.error).to.have.own.property("message");
         });
     });
   });

@@ -1,5 +1,6 @@
 "use strict";
 
+const createError = require("http-errors");
 const database = require("../database");
 
 module.exports = {
@@ -7,9 +8,7 @@ module.exports = {
     const { name } = paramObj;
 
     if (!name || typeof name !== "string" || !name.trim())
-      return new Error({
-        error: { status: 400, message: "Name must be supplied." }
-      });
+      return Promise.reject(createError(400, "Name must be supplied"));
 
     const query = `
       INSERT INTO tags (name)
@@ -25,13 +24,13 @@ module.exports = {
       .query(query, values)
       .then(results => {
         client.release();
-        return results.rows;
+        return Promise.resolve(results.rows);
       })
       .catch(err => {
         client.release();
-        return new Error({
-          error: { status: 500, message: `tags.create SQL Error: ${err}` }
-        });
+        return Promise.reject(
+          createError(500, `tags.create SQL Error: ${err}`)
+        );
       });
   }
 };

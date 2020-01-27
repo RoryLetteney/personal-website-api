@@ -1,5 +1,6 @@
 "use strict";
 
+const createError = require("http-errors");
 const database = require("../database");
 
 module.exports = {
@@ -16,16 +17,14 @@ module.exports = {
         return client
           .query(query)
           .then(() => {
-            return client.release();
+            client.release();
+            Promise.resolve();
           })
           .catch(err => {
             client.release();
-            return new Error({
-              error: {
-                status: 500,
-                message: `tags.cleanup.create SQL Error: ${err}`
-              }
-            });
+            return Promise.reject(
+              createError(500, `tags.cleanup.create SQL Error: ${err}`)
+            );
           });
       }
     }
