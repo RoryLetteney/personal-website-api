@@ -7,11 +7,11 @@ const { expect } = require("chai");
 const testHelpers = require("./testHelpers");
 
 describe("tags-routes", () => {
-  describe("POST /api/tags", () => {
-    after(() => {
-      return testHelpers.tags.cleanup.create();
-    });
+  after(() => {
+    return testHelpers.tags.cleanup.create();
+  });
 
+  describe("POST /api/tags", () => {
     it("should return status 200 and newly created tag", () => {
       return request
         .post("/api/tags")
@@ -45,6 +45,24 @@ describe("tags-routes", () => {
             .to.have.own.property("status")
             .and.to.equal(400);
           expect(response.error).to.have.own.property("message");
+        });
+    });
+  });
+
+  describe("GET /api/tags", () => {
+    it("should return status 200 and a list of tags", () => {
+      return request
+        .get("/api/tags")
+        .expect(200)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response).to.be.an("array");
+          expect(response[0]).to.be.an("object");
+          expect(response[0]).to.have.own.property("id");
+          expect(response[0]).to.have.own.property("name");
         });
     });
   });
