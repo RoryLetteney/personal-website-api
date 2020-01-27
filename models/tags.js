@@ -103,5 +103,52 @@ module.exports = {
           createError(500, `tags.update SQL Error: ${err}`)
         );
       });
+  },
+  delete: async id => {
+    if (id === null || id === undefined || !/^\d+$/.test(id) || !id.trim())
+      return Promise.reject(
+        createError(400, "ID must be supplied and must be a number")
+      );
+
+    let query = `
+        DELETE FROM tags
+        WHERE id = $1
+    `;
+    const values = [id];
+
+    const client = await database.connect();
+    await client
+      .query(query, values)
+      .then(results => {
+        if (!results.rowCount)
+          return Promise.reject(createError(404, "Tag not found"));
+
+        query = `
+          SELECT
+            id
+            ,name
+          FROM tags
+        `;
+      })
+      .catch(err => {
+        return Promise.reject(
+          createError(500, `tags.delete SQL Error: ${err}`)
+        );
+      });
+    return client
+      .query(query)
+      .then(results => {
+        client.release();
+
+        if (!results.rows.length)
+          return Promise.reject(createError(404, "No tags found"));
+
+        return Promise.resolve(results.rows);
+      })
+      .catch(err => {
+        return Promise.reject(
+          createError(500, `tags.delete SQL Error: ${err}`)
+        );
+      });
   }
 };
