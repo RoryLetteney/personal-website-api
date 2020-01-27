@@ -92,7 +92,7 @@ module.exports = {
       .query(query, values)
       .then(results => {
         client.release();
-        
+
         if (!results.rows.length)
           return Promise.reject(createError(404, "Tag not found"));
 

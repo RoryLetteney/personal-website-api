@@ -148,3 +148,42 @@ router.put("/api/tags/:id", jsonParser, (req, res, next) => {
     .then(results => res.send(JSON.stringify(results)))
     .catch(next);
 });
+
+/**
+ * @swagger
+ * /api/tags/:id:
+ *   delete:
+ *     tags:
+ *       - tags
+ *     produces:
+ *       - application/json
+ *     description: Deletes the tag with the specified ID
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         type: integer
+ *     responses:
+ *       200:
+ *         description: success response
+ *         schema:
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/tags'
+ *       400:
+ *         description: bad request
+ *         schema:
+ *           $ref: '#/definitions/error'
+ *       404:
+ *         description: tag doesn't exist
+ *         schema:
+ *           $ref: '#/definitions/error'
+ *
+ */
+
+router.delete("/api/tags/:id", (req, res, next) => {
+  return tags
+    .delete(req.params.id)
+    .then(results => res.send(JSON.stringify(results)))
+    .catch(next);
+});

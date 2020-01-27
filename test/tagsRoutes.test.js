@@ -157,7 +157,7 @@ describe("tags-routes", () => {
         .post("/api/tags")
         .send({ name: "test-tag-delete" })
         .then(res => {
-          return createdTagId = JSON.parse(res.text)[0].id;
+          return (createdTagId = JSON.parse(res.text)[0].id);
         });
     });
 
