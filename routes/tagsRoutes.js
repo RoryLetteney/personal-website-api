@@ -1,14 +1,14 @@
 "use strict";
 
 const { Router } = require("express");
-const router = module.exports = new Router();
+const router = (module.exports = new Router());
 const jsonParser = require("body-parser").json();
 
 const tags = require("../models/tags");
 
 /**
  * @swagger
- * 
+ *
  * definitions:
  *   tags:
  *     type: object
@@ -64,7 +64,8 @@ const tags = require("../models/tags");
  */
 
 router.post("/api/tags", jsonParser, (req, res, next) => {
-  return tags.create(req.body)
+  return tags
+    .create(req.body)
     .then(results => res.send(JSON.stringify(results)))
     .catch(next);
 });
