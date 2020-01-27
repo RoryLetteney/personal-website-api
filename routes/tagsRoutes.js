@@ -101,7 +101,7 @@ router.get("/api/tags", (req, res, next) => {
 
 /**
  * @swagger
- * /api/tags/:id
+ * /api/tags/:id:
  *   put:
  *     tags:
  *       - tags
