@@ -3,12 +3,11 @@
 // NPM PACKAGE IMPORTS
 require("dotenv").config();
 const express = require("express");
-const database = require("./database");
 const swaggerUI = require("swagger-ui-express");
 const swaggerJSDoc = require("swagger-jsdoc");
 
 // SETUP
-const app = express();
+const app = (module.exports = express());
 const PORT = process.env.PORT || 3300;
 const swaggerDefinition = {
   info: {
@@ -27,12 +26,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 // ROUTES
-app.get("/", async (req, res) => {
-  const client = await database.connect();
-  const results = await client.query("SELECT NOW()");
-  const tags = results.rows;
-  client.release();
-  res.send(tags);
+app.use(require("./routes/tagsRoutes"));
+
+// ERROR HANDLER
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  res.status(err.status || 500);
+  res.send({ error: { status: err.status, message: err.message } });
 });
 
 // STARTUP
