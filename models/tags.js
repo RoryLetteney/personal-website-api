@@ -4,6 +4,32 @@ const createError = require("http-errors");
 const database = require("../database");
 
 module.exports = {
+  fetchAll: async () => {
+    const query = `
+      SELECT
+        id
+        ,name
+      FROM tags
+    `;
+
+    const client = await database.connect();
+    return client
+      .query(query)
+      .then(results => {
+        client.release();
+
+        if (!results.rows.length)
+          return Promise.reject(createError(404, "No tags found"));
+
+        return Promise.resolve(results.rows);
+      })
+      .catch(err => {
+        client.release();
+        return Promise.reject(
+          createError(500, `tags.fetchAll SQL Error: ${err}`)
+        );
+      });
+  },
   create: async paramObj => {
     const { name } = paramObj;
 
