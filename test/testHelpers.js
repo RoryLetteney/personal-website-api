@@ -32,14 +32,14 @@ module.exports = {
   },
   skills: {
     cleanup: {
-      create: async id => {
+      create: async ids => {
         const client = await database.connect();
 
         const query = `
           DELETE FROM skills
-          WHERE id = $1
+          WHERE id IN (${"?,".repeat(ids.length).slice(0, -1)})
         `;
-        const values = [id];
+        const values = ids;
 
         return client
           .query(query, values)

@@ -7,20 +7,35 @@ const { expect } = require("chai");
 const testHelpers = require("./testHelpers");
 
 describe("skills-routes", () => {
-  let createdSkillId;
+  let createdSkillIds;
 
   after(() => {
-    return testHelpers.skills.cleanup.create(createdSkillId);
+    return testHelpers.skills.cleanup.create(createdSkillIds);
   });
 
   describe("POST /api/skills", () => {
-    it("should return status 200 and newly created tag", () => {
+    it("should return status 200 and newly created skills", () => {
       return request
         .post("/api/skills")
         .send({
-          name: "test-skill",
-          example: "test-example",
-          start_date: "2015-01-01"
+          skills: [
+            {
+              name: "test-skill-1",
+              example: "test-example-1",
+              start_date: "2015-01-01"
+            },
+            {
+              name: "test-skill-2",
+              example: "test-example-2"
+            },
+            {
+              name: "test-skill-3",
+              start_date: "2015-01-01"
+            },
+            {
+              name: "test-skill-4"
+            }
+          ]
         })
         .expect(200)
         .expect(res => {
@@ -35,7 +50,24 @@ describe("skills-routes", () => {
           expect(response[0]).to.have.own.property("example");
           expect(response[0]).to.have.own.property("start_date");
 
-          createdSkillId = response[0].id;
+          createdSkillIds = response.map(i => i.id);
+        });
+    });
+
+    it("should return status 400 and a helpful message when no list of skills sent", () => {
+      return request
+        .post("/api/skills")
+        .send({})
+        .expect(400)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response).to.be.an("object");
+          expect(response).to.have.own.property("error");
+          expect(response.error).to.have.own.property("status");
+          expect(response.error).to.have.own.property("message");
         });
     });
 
@@ -43,8 +75,12 @@ describe("skills-routes", () => {
       return request
         .post("/api/skills")
         .send({
-          example: "test-example",
-          start_date: "2015-01-01"
+          skills: [
+            {
+              example: "test-example",
+              start_date: "2015-01-01"
+            }
+          ]
         })
         .expect(400)
         .expect(res => {
