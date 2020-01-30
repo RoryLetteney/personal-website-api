@@ -1,0 +1,11 @@
+ALTER TABLE
+  tags
+ALTER COLUMN
+  name
+SET
+  NOT NULL;
+
+ALTER TABLE
+  tags
+ADD
+  CONSTRAINT unk_name UNIQUE (name);
