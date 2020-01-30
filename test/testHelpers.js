@@ -35,9 +35,11 @@ module.exports = {
       create: async ids => {
         const client = await database.connect();
 
+        const inClause = ids.map((_, idx) => `$${idx + 1}`).join(",");
+
         const query = `
           DELETE FROM skills
-          WHERE id IN (${"?,".repeat(ids.length).slice(0, -1)})
+          WHERE id IN (${inClause})
         `;
         const values = ids;
 

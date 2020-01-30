@@ -8,4 +8,4 @@ SET
 ALTER TABLE
   tags
 ADD
-  CONSTRAINT unk_name UNIQUE (name);
+  CONSTRAINT unk_tags_name UNIQUE (name);

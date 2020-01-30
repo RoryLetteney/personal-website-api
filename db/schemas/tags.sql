@@ -1,5 +1,5 @@
 CREATE TABLE tags (
   id SERIAL PRIMARY KEY,
   name VARCHAR NOT NULL,
-  CONSTRAINT unk_name UNIQUE (name)
+  CONSTRAINT unk_tags_name UNIQUE (name)
 );

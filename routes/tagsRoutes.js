@@ -42,7 +42,7 @@ const tags = require("../models/tags");
  *       - name: body
  *         in: body
  *         required: true
- *         description: holds paramters to be entered
+ *         description: holds parameters to be entered
  *         schema:
  *           type: object
  *           properties:

@@ -7,13 +7,13 @@ const { expect } = require("chai");
 const testHelpers = require("./testHelpers");
 
 describe("skills-routes", () => {
-  let createdSkillIds;
-
-  after(() => {
-    return testHelpers.skills.cleanup.create(createdSkillIds);
-  });
-
   describe("POST /api/skills", () => {
+    let createdSkillIds;
+
+    after(() => {
+      return testHelpers.skills.cleanup.create(createdSkillIds);
+    });
+
     it("should return status 200 and newly created skills", () => {
       return request
         .post("/api/skills")
@@ -66,8 +66,12 @@ describe("skills-routes", () => {
 
           expect(response).to.be.an("object");
           expect(response).to.have.own.property("error");
-          expect(response.error).to.have.own.property("status");
-          expect(response.error).to.have.own.property("message");
+          expect(response.error)
+            .to.have.own.property("status")
+            .and.to.equal(400);
+          expect(response.error)
+            .to.have.own.property("message")
+            .and.to.be.a("string");
         });
     });
 
@@ -90,8 +94,12 @@ describe("skills-routes", () => {
 
           expect(response).to.be.an("object");
           expect(response).to.have.own.property("error");
-          expect(response.error).to.have.own.property("status");
-          expect(response.error).to.have.own.property("message");
+          expect(response.error)
+            .to.have.own.property("status")
+            .and.to.equal(400);
+          expect(response.error)
+            .to.have.own.property("message")
+            .and.to.be.a("string");
         });
     });
   });
