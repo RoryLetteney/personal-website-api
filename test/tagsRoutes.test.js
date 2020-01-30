@@ -9,7 +9,7 @@ const testHelpers = require("./testHelpers");
 describe("tags-routes", () => {
   let createdTagId;
 
-  after(async () => {
+  after(() => {
     return testHelpers.tags.cleanup.create(createdTagId);
   });
 

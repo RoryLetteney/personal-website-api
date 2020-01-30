@@ -29,5 +29,31 @@ module.exports = {
           });
       }
     }
+  },
+  skills: {
+    cleanup: {
+      create: async id => {
+        const client = await database.connect();
+
+        const query = `
+          DELETE FROM skills
+          WHERE id = $1
+        `;
+        const values = [id];
+
+        return client
+          .query(query, values)
+          .then(() => {
+            client.release();
+            return Promise.resolve();
+          })
+          .catch(err => {
+            client.release();
+            return Promise.reject(
+              createError(500, `tags.cleanup.create SQL Error: ${err}`)
+            );
+          });
+      }
+    }
   }
 };
