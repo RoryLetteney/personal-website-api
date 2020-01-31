@@ -103,4 +103,69 @@ describe("skills-routes", () => {
         });
     });
   });
+
+  describe.only("GET /api/skills", () => {
+    let createdSkills;
+
+    before(() => {
+      return request
+        .post("/api/skills")
+        .send({
+          skills: [
+            {
+              name: "test-skill-1"
+            },
+            { name: "test-skill-2" },
+            { name: "test-skill-3" }
+          ]
+        })
+        .then(res => {
+          createdSkills = JSON.parse(res.text);
+        });
+    });
+
+    afterEach(() => {
+      return testHelpers.skills.cleanup.create(createdSkills.map(cs => cs.id));
+    });
+
+    it("should return 200 and a list of the skills", () => {
+      return request
+        .get("/api/skills")
+        .expect(200)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response)
+            .to.be.an("array")
+            .and.lengthOf.at.least(3);
+          expect(response[0]).to.be.an("object");
+          expect(response[0]).to.have.own.property("id");
+          expect(response[0]).to.have.own.property("name");
+          expect(response[0]).to.have.own.property("example");
+          expect(response[0]).to.have.own.property("start_date");
+        });
+    });
+
+    it("should return 404 if no skills found", () => {
+      return request
+        .get("/api/skills")
+        .expect(404)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response).to.be.an("object");
+          expect(response).to.have.own.property("error");
+          expect(response.error)
+            .to.have.own.property("status")
+            .and.to.equal(404);
+          expect(response.error)
+            .to.have.own.property("message")
+            .and.to.be.a("string");
+        });
+    });
+  });
 });
