@@ -167,4 +167,123 @@ describe("skills-routes", () => {
       });
     });
   });
+
+  describe("PUT /api/skills/:id", () => {
+    let createdSkillId;
+
+    before(() => {
+      return request
+        .post("/api/skills")
+        .send({
+          skills: [{ name: "test-skill-1" }]
+        })
+        .then(res => (createdSkillId = JSON.parse(res.text)[0].id));
+    });
+
+    after(() => {
+      return testHelpers.skills.cleanup.create([createdSkillId]);
+    });
+
+    it("should return 200 and updated skill", () => {
+      return request
+        .put(`/api/skills/${createdSkillId}`)
+        .send({
+          name: "test-skill-1-updated",
+          example: "test-example-1",
+          start_date: "2015-01-01"
+        })
+        .expect(200)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response).to.be.an("array");
+          expect(response[0]).to.be.an("object");
+          expect(response[0])
+            .to.have.own.property("id")
+            .and.to.equal(createdSkillId);
+          expect(response[0])
+            .to.have.own.property("name")
+            .and.to.equal("test-skill-1-updated");
+          expect(response[0])
+            .to.have.own.property("example")
+            .and.to.equal("test-example-1");
+          expect(response[0])
+            .to.have.own.property("start_date")
+            .and.to.equal("2015-01-01");
+        });
+    });
+
+    it("should return 400 if sent an invalid id", () => {
+      return request
+        .put("/api/skills/invalid")
+        .send({
+          name: "test-skill-1-updated",
+          example: "test-example-1",
+          start_date: "2015-01-01"
+        })
+        .expect(400)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response).to.be.an("object");
+          expect(response).to.have.own.property("error");
+          expect(response.error)
+            .to.have.own.property("status")
+            .and.to.equal(400);
+          expect(response.error)
+            .to.have.own.property("message")
+            .and.to.be.a("string");
+        });
+    });
+
+    it("should return 400 if no parameters sent to update", () => {
+      return request
+        .put(`/api/skills/${createdSkillId}`)
+        .send({})
+        .expect(400)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response).to.be.an("object");
+          expect(response).to.have.own.property("error");
+          expect(response.error)
+            .to.have.own.property("status")
+            .and.to.equal(400);
+          expect(response.error)
+            .to.have.own.property("message")
+            .and.to.be.a("string");
+        });
+    });
+
+    it("should return 404 if sent an id of a row that isn't found", () => {
+      return request
+        .put("/api/skills/0")
+        .send({
+          name: "test-skill-1-updated",
+          example: "test-example-1",
+          start_date: "2015-01-01"
+        })
+        .expect(404)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response).to.be.an("object");
+          expect(response).to.have.own.property("error");
+          expect(response.error)
+            .to.have.own.property("status")
+            .and.to.equal(404);
+          expect(response.error)
+            .to.have.own.property("message")
+            .and.to.be.a("string");
+        });
+    });
+  });
 });
