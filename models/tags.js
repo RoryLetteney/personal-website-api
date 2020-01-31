@@ -3,6 +3,8 @@
 const createError = require("http-errors");
 const database = require("../database");
 
+const { verifyString, verifyNumber } = require("./modelsHelper");
+
 module.exports = {
   fetchAll: async () => {
     const query = `
@@ -27,14 +29,17 @@ module.exports = {
         client.release();
 
         return Promise.reject(
-          createError(500, `tags.fetchAll SQL Error: ${err}`)
+          createError(
+            err.status || 500,
+            err.message || `tags.fetchAll SQL Error: ${err}`
+          )
         );
       });
   },
   create: async paramObj => {
     const { name } = paramObj;
 
-    if (!name || typeof name !== "string" || !name.trim())
+    if (!name || !verifyString(name))
       return Promise.reject(
         createError(400, "Name must be supplied and must be a string")
       );
@@ -46,7 +51,7 @@ module.exports = {
         id
         ,name
     `;
-    const values = [name];
+    const values = [name.toLowerCase()];
 
     const client = await database.connect();
     return client
@@ -60,19 +65,22 @@ module.exports = {
         client.release();
 
         return Promise.reject(
-          createError(500, `tags.create SQL Error: ${err}`)
+          createError(
+            err.status || 500,
+            err.message || `tags.create SQL Error: ${err}`
+          )
         );
       });
   },
   update: async paramObj => {
     const { id, name } = paramObj;
 
-    if (id === null || id === undefined || !/^\d+$/.test(id) || !id.trim())
+    if (id === null || id === undefined || !verifyNumber(id))
       return Promise.reject(
         createError(400, "ID must be supplied and must be a number")
       );
 
-    if (!name || typeof name !== "string" || !name.trim())
+    if (!name || !verifyString(name))
       return Promise.reject(
         createError(400, "Name must be supplied and must be a string")
       );
@@ -100,12 +108,15 @@ module.exports = {
       })
       .catch(err => {
         return Promise.reject(
-          createError(500, `tags.update SQL Error: ${err}`)
+          createError(
+            err.status || 500,
+            err.message || `tags.update SQL Error: ${err}`
+          )
         );
       });
   },
   delete: async id => {
-    if (id === null || id === undefined || !/^\d+$/.test(id) || !id.trim())
+    if (id === null || id === undefined || !verifyNumber(id))
       return Promise.reject(
         createError(400, "ID must be supplied and must be a number")
       );
@@ -132,7 +143,10 @@ module.exports = {
       })
       .catch(err => {
         return Promise.reject(
-          createError(500, `tags.delete SQL Error: ${err}`)
+          createError(
+            err.status || 500,
+            err.message || `tags.delete SQL Error: ${err}`
+          )
         );
       });
     return client
@@ -140,14 +154,18 @@ module.exports = {
       .then(results => {
         client.release();
 
-        if (!results.rows.length)
+        if (!results.rows.length) {
           return Promise.reject(createError(404, "No tags found"));
+        }
 
         return Promise.resolve(results.rows);
       })
       .catch(err => {
         return Promise.reject(
-          createError(500, `tags.delete SQL Error: ${err}`)
+          createError(
+            err.status || 500,
+            err.message || `tags.delete SQL Error: ${err}`
+          )
         );
       });
   }

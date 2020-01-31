@@ -4,18 +4,22 @@ const { Router } = require("express");
 const router = (module.exports = new Router());
 const jsonParser = require("body-parser").json();
 
-const tags = require("../models/tags");
+const skills = require("../models/skills");
 
 /**
  * @swagger
  *
  * definitions:
- *   tags:
+ *   skills:
  *     type: object
  *     properties:
  *       id:
  *         type: integer
  *       name:
+ *         type: string
+ *       example:
+ *         type: string
+ *       start_date:
  *         type: string
  *   error:
  *     type: object
@@ -27,17 +31,18 @@ const tags = require("../models/tags");
  *             type: integer
  *           message:
  *             type: string
+ *
  */
 
 /**
  * @swagger
- * /api/tags:
+ * /api/skills:
  *   post:
  *     tags:
- *       - tags
+ *       - skills
  *     produces:
  *       - application/json
- *     description: Returns newly created tag
+ *     description: Returns newly created skills
  *     parameters:
  *       - name: body
  *         in: body
@@ -46,25 +51,37 @@ const tags = require("../models/tags");
  *         schema:
  *           type: object
  *           properties:
- *             name:
- *               type: string
- *               description: name of new tag
- *               required: true
+ *             skills:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                     required: true
+ *                   example:
+ *                     type: string
+ *                     required: false
+ *                     description: short example of skill use
+ *                   start_date:
+ *                     type: string
+ *                     required: false
+ *                     description: date skill was acquired, formatted YYYY-MM-DD
  *     responses:
  *       200:
  *         description: success response
  *         schema:
  *           type: array
  *           items:
- *             $ref: '#/definitions/tags'
+ *             $ref: '#/definitions/skills'
  *       400:
  *         description: bad request
  *         schema:
  *           $ref: '#/definitions/error'
  */
 
-router.post("/api/tags", jsonParser, (req, res, next) => {
-  return tags
+router.post("/api/skills", jsonParser, (req, res, next) => {
+  return skills
     .create(req.body)
     .then(results => res.send(JSON.stringify(results)))
     .catch(next);
@@ -72,28 +89,29 @@ router.post("/api/tags", jsonParser, (req, res, next) => {
 
 /**
  * @swagger
- * /api/tags:
+ * /api/skills:
  *   get:
  *     tags:
- *       - tags
+ *       - skills
  *     produces:
  *       - application/json
- *     description: Returns all tags in database
+ *     description: Returns list of all skills
  *     responses:
  *       200:
  *         description: success response
  *         schema:
  *           type: array
  *           items:
- *             $ref: '#/definitions/tags'
+ *             $ref: '#/definitions/skills'
  *       404:
- *         description: no tags found
+ *         description: no skills found
  *         schema:
  *           $ref: '#/definitions/error'
+ *
  */
 
-router.get("/api/tags", (req, res, next) => {
-  return tags
+router.get("/api/skills", (req, res, next) => {
+  return skills
     .fetchAll()
     .then(results => res.send(JSON.stringify(results)))
     .catch(next);
@@ -101,49 +119,55 @@ router.get("/api/tags", (req, res, next) => {
 
 /**
  * @swagger
- * /api/tags/:id:
+ * /api/skills/:id:
  *   put:
  *     tags:
- *       - tags
+ *       - skills
  *     produces:
  *       - application/json
- *     description: Update the name of the specified tag
+ *     description: Updates the specified skill and returns the updated row
  *     parameters:
  *       - name: id
  *         in: path
- *         description: ID of tag
  *         required: true
- *         type: integer
+ *         description: id of skill to update
  *       - name: body
  *         in: body
- *         description: holds new name value
+ *         required: true
+ *         description: Holds parameters to be entered. Results in 400 if no parameters sent.
  *         schema:
  *           type: object
  *           properties:
  *             name:
  *               type: string
- *               required: true
+ *               required: false
+ *             example:
+ *               type: string
+ *               required: false
+ *             start_date:
+ *               type: string
+ *               required: false
  *     responses:
  *       200:
  *         description: success response
  *         schema:
  *           type: array
  *           items:
- *             $ref: '#/definitions/tags'
+ *             $ref: '#/definitions/skills'
  *       400:
  *         description: bad request
  *         schema:
  *           $ref: '#/definitions/error'
  *       404:
- *         description: tag doesn't exist
+ *         description: no skills found
  *         schema:
  *           $ref: '#/definitions/error'
  *
  */
 
-router.put("/api/tags/:id", jsonParser, (req, res, next) => {
+router.put("/api/skills/:id", jsonParser, (req, res, next) => {
   req.body.id = req.params.id;
-  return tags
+  return skills
     .update(req.body)
     .then(results => res.send(JSON.stringify(results)))
     .catch(next);
@@ -151,38 +175,38 @@ router.put("/api/tags/:id", jsonParser, (req, res, next) => {
 
 /**
  * @swagger
- * /api/tags/:id:
+ * /api/skills/:id:
  *   delete:
  *     tags:
- *       - tags
+ *       - skills
  *     produces:
  *       - application/json
- *     description: Deletes the tag with the specified ID
+ *     description: Deletes the specified skill and returns the remaining rows
  *     parameters:
  *       - name: id
  *         in: path
  *         required: true
- *         type: integer
+ *         description: id of skill to delete
  *     responses:
  *       200:
  *         description: success response
  *         schema:
  *           type: array
  *           items:
- *             $ref: '#/definitions/tags'
+ *             $ref: '#/definitions/skills'
  *       400:
  *         description: bad request
  *         schema:
  *           $ref: '#/definitions/error'
  *       404:
- *         description: tag doesn't exist
+ *         description: no skills found
  *         schema:
  *           $ref: '#/definitions/error'
  *
  */
 
-router.delete("/api/tags/:id", (req, res, next) => {
-  return tags
+router.delete("/api/skills/:id", (req, res, next) => {
+  return skills
     .delete(req.params.id)
     .then(results => res.send(JSON.stringify(results)))
     .catch(next);
