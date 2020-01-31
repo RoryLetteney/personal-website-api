@@ -102,9 +102,9 @@ router.post("/api/skills", jsonParser, (req, res, next) => {
  *         schema:
  *           type: array
  *           items:
- *             $ref: '#/definitions/tags'
+ *             $ref: '#/definitions/skills'
  *       404:
- *         description: no tags found
+ *         description: no skills found
  *         schema:
  *           $ref: '#/definitions/error'
  *
@@ -113,6 +113,58 @@ router.post("/api/skills", jsonParser, (req, res, next) => {
 router.get("/api/skills", (req, res, next) => {
   return skills
     .fetchAll()
+    .then(results => res.send(JSON.stringify(results)))
+    .catch(next);
+});
+
+/**
+ * @swagger
+ * /api/skills/:id:
+ *   put:
+ *     tags:
+ *       - skills
+ *     produces:
+ *       - application/json
+ *     description: Updates the specified skill and returns the updated row
+ *     parameters:
+ *       - name: body
+ *         in: body
+ *         required: true
+ *         description: Holds parameters to be entered. Results in 400 if no parameters sent.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               required: false
+ *             example:
+ *               type: string
+ *               required: false
+ *             start_date:
+ *               type: string
+ *               required: false
+ *     responses:
+ *       200:
+ *         description: success response
+ *         schema:
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/skills'
+ *       400:
+ *         description: bad request
+ *         schema:
+ *           $ref: '#/definitions/error'
+ *       404:
+ *         description: no skills found
+ *         schema:
+ *           $ref: '#/definitions/error'
+ *
+ */
+
+router.put("/api/skills/:id", jsonParser, (req, res, next) => {
+  req.body.id = req.params.id;
+  return skills
+    .update(req.body)
     .then(results => res.send(JSON.stringify(results)))
     .catch(next);
 });
