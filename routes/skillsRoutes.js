@@ -127,6 +127,10 @@ router.get("/api/skills", (req, res, next) => {
  *       - application/json
  *     description: Updates the specified skill and returns the updated row
  *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: id of skill to update
  *       - name: body
  *         in: body
  *         required: true
@@ -165,6 +169,45 @@ router.put("/api/skills/:id", jsonParser, (req, res, next) => {
   req.body.id = req.params.id;
   return skills
     .update(req.body)
+    .then(results => res.send(JSON.stringify(results)))
+    .catch(next);
+});
+
+/**
+ * @swagger
+ * /api/skills/:id:
+ *   delete:
+ *     tags:
+ *       - skills
+ *     produces:
+ *       - application/json
+ *     description: Deletes the specified skill and returns the remaining rows
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: id of skill to delete
+ *     responses:
+ *       200:
+ *         description: success response
+ *         schema:
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/skills'
+ *       400:
+ *         description: bad request
+ *         schema:
+ *           $ref: '#/definitions/error'
+ *       404:
+ *         description: no skills found
+ *         schema:
+ *           $ref: '#/definitions/error'
+ *
+ */
+
+router.delete("/api/skills/:id", (req, res, next) => {
+  return skills
+    .delete(req.params.id)
     .then(results => res.send(JSON.stringify(results)))
     .catch(next);
 });

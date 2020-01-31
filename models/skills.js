@@ -14,7 +14,7 @@ module.exports = {
         id
         ,name
         ,example
-        ,start_date
+        ,TO_CHAR(start_date :: DATE, 'YYYY-MM-DD') AS start_date
       FROM skills
     `;
 
@@ -77,7 +77,11 @@ module.exports = {
       const query = `
         INSERT INTO skills (${columns.slice(0, values.length).join(",")})
         VALUES (${values.map((_, idx) => `$${idx + 1}`).join(",")})
-        RETURNING id, name, example, start_date
+        RETURNING 
+          id
+          ,name
+          ,example
+          ,TO_CHAR(start_date :: DATE, 'YYYY-MM-DD') AS start_date
       `;
 
       promiseArray.push(client.query(query, values));
@@ -169,6 +173,60 @@ module.exports = {
           createError(
             err.status || 500,
             err.message || `skills.update SQL Error: ${err}`
+          )
+        );
+      });
+  },
+  delete: async id => {
+    if (id === null || id === undefined || !verifyNumber(id))
+      return Promise.reject(
+        createError(400, "ID must be supplied and must be a number")
+      );
+
+    let query = `
+      DELETE FROM skills
+      WHERE id = $1
+    `;
+    const values = [id];
+
+    const client = await database.connect();
+    await client
+      .query(query, values)
+      .then(results => {
+        if (!results.rowCount)
+          return Promise.reject(createError(404, "Skill not found"));
+
+        query = `
+          SELECT 
+            id
+            ,name
+            ,example
+            ,TO_CHAR(start_date :: DATE, 'YYYY-MM-DD') AS start_date
+          FROM skills
+        `;
+      })
+      .catch(err => {
+        return Promise.reject(
+          createError(
+            err.status || 500,
+            err.message || `skills.delete SQL Error: ${err}`
+          )
+        );
+      });
+
+    return client
+      .query(query)
+      .then(results => {
+        if (!results.rowCount)
+          return Promise.reject(createError(404, "No skills found"));
+
+        return Promise.resolve(results.rows);
+      })
+      .catch(err => {
+        return Promise.reject(
+          createError(
+            err.status || 500,
+            err.message || `skills.delete SQL Error: ${err}`
           )
         );
       });

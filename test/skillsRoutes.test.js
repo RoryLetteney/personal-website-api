@@ -6,7 +6,7 @@ const { expect } = require("chai");
 
 const testHelpers = require("./testHelpers");
 
-describe("skills-routes", () => {
+describe.only("skills-routes", () => {
   describe("POST /api/skills", () => {
     let createdSkillIds;
 
@@ -298,32 +298,31 @@ describe("skills-routes", () => {
     });
 
     it("should return 200 and list of the remaining skills", () => {
-      return request
-        .delete(`/api/skills/${createdSkillId}`)
-        .expect(200)
-        .expect(res => {
-          expect(res.text).to.be.a("string");
+      return request.delete(`/api/skills/${createdSkillId}`).expect(res => {
+        expect(res.text).to.be.a("string");
 
-          const response = JSON.parse(res.text);
+        const response = JSON.parse(res.text);
 
-          if (Array.isArray(response)) {
-            expect(response).to.be.an("array");
-            expect(response[0]).to.be.an("object");
-            expect(response[0]).to.have.own.property("id");
-            expect(response[0]).to.have.own.property("name");
-            expect(response[0]).to.have.own.property("example");
-            expect(response[0]).to.have.own.property("start_date");
-          } else if (typeof response === "object") {
-            expect(response).to.be.an("object");
-            expect(response).to.have.own.property("error");
-            expect(response.error)
-              .to.have.own.property("status")
-              .and.to.equal(404);
-            expect(response.error)
-              .to.have.own.property("message")
-              .and.to.be.a("string");
-          }
-        });
+        if (Array.isArray(response)) {
+          expect(res.status).to.equal(200);
+          expect(response).to.be.an("array");
+          expect(response[0]).to.be.an("object");
+          expect(response[0]).to.have.own.property("id");
+          expect(response[0]).to.have.own.property("name");
+          expect(response[0]).to.have.own.property("example");
+          expect(response[0]).to.have.own.property("start_date");
+        } else if (typeof response === "object") {
+          expect(res.status).to.equal(404);
+          expect(response).to.be.an("object");
+          expect(response).to.have.own.property("error");
+          expect(response.error)
+            .to.have.own.property("status")
+            .and.to.equal(404);
+          expect(response.error)
+            .to.have.own.property("message")
+            .and.to.be.a("string");
+        }
+      });
     });
 
     it("should return 400 if sent an invalid id", () => {
