@@ -6,6 +6,37 @@ const database = require("../database");
 const { verifyString } = require("./modelsHelper");
 
 module.exports = {
+  fetchAll: async () => {
+    const client = await database.connect();
+
+    const query = `
+      SELECT
+        id
+        ,name
+        ,example
+        ,start_date
+      FROM skills
+    `;
+
+    return client
+      .query(query)
+      .then(results => {
+        client.release();
+
+        if (!results.rowCount)
+          return Promise.reject(createError(404, "No skills found"));
+
+        return Promise.resolve(results.rows);
+      })
+      .catch(err => {
+        return Promise.reject(
+          createError(
+            err.status || 500,
+            err.message || `skills.fetchAll SQL Error: ${err}`
+          )
+        );
+      });
+  },
   create: async paramObj => {
     const { skills } = paramObj;
 
@@ -62,7 +93,12 @@ module.exports = {
       })
       .then(results => Promise.resolve(results))
       .catch(err =>
-        Promise.reject(createError(500, `skills.create SQL Error: ${err}`))
+        Promise.reject(
+          createError(
+            err.status || 500,
+            err.message || `skills.create SQL Error: ${err}`
+          )
+        )
       );
   }
 };

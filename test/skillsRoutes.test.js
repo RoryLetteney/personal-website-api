@@ -104,7 +104,7 @@ describe("skills-routes", () => {
     });
   });
 
-  describe.only("GET /api/skills", () => {
+  describe("GET /api/skills", () => {
     let createdSkills;
 
     before(() => {
@@ -149,14 +149,12 @@ describe("skills-routes", () => {
     });
 
     it("should return 404 if no skills found", () => {
-      return request
-        .get("/api/skills")
-        .expect(404)
-        .expect(res => {
-          expect(res.text).to.be.a("string");
+      return request.get("/api/skills").expect(res => {
+        expect(res.text).to.be.a("string");
 
-          const response = JSON.parse(res.text);
+        const response = JSON.parse(res.text);
 
+        if (typeof response === "object") {
           expect(response).to.be.an("object");
           expect(response).to.have.own.property("error");
           expect(response.error)
@@ -165,7 +163,8 @@ describe("skills-routes", () => {
           expect(response.error)
             .to.have.own.property("message")
             .and.to.be.a("string");
-        });
+        }
+      });
     });
   });
 });

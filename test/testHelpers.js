@@ -24,7 +24,10 @@ module.exports = {
           .catch(err => {
             client.release();
             return Promise.reject(
-              createError(500, `tags.cleanup.create SQL Error: ${err}`)
+              createError(
+                err.status || 500,
+                err.message || `tags.cleanup.create SQL Error: ${err}`
+              )
             );
           });
       }
@@ -52,7 +55,10 @@ module.exports = {
           .catch(err => {
             client.release();
             return Promise.reject(
-              createError(500, `tags.cleanup.create SQL Error: ${err}`)
+              createError(
+                err.status || 500,
+                err.message || `tags.cleanup.create SQL Error: ${err}`
+              )
             );
           });
       }

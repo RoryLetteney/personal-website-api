@@ -29,7 +29,10 @@ module.exports = {
         client.release();
 
         return Promise.reject(
-          createError(500, `tags.fetchAll SQL Error: ${err}`)
+          createError(
+            err.status || 500,
+            err.message || `tags.fetchAll SQL Error: ${err}`
+          )
         );
       });
   },
@@ -62,7 +65,10 @@ module.exports = {
         client.release();
 
         return Promise.reject(
-          createError(500, `tags.create SQL Error: ${err}`)
+          createError(
+            err.status || 500,
+            err.message || `tags.create SQL Error: ${err}`
+          )
         );
       });
   },
@@ -102,7 +108,10 @@ module.exports = {
       })
       .catch(err => {
         return Promise.reject(
-          createError(500, `tags.update SQL Error: ${err}`)
+          createError(
+            err.status || 500,
+            err.message || `tags.update SQL Error: ${err}`
+          )
         );
       });
   },
@@ -134,7 +143,10 @@ module.exports = {
       })
       .catch(err => {
         return Promise.reject(
-          createError(500, `tags.delete SQL Error: ${err}`)
+          createError(
+            err.status || 500,
+            err.message || `tags.delete SQL Error: ${err}`
+          )
         );
       });
     return client
@@ -150,7 +162,10 @@ module.exports = {
       })
       .catch(err => {
         return Promise.reject(
-          createError(500, `tags.delete SQL Error: ${err}`)
+          createError(
+            err.status || 500,
+            err.message || `tags.delete SQL Error: ${err}`
+          )
         );
       });
   }

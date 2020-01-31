@@ -86,3 +86,33 @@ router.post("/api/skills", jsonParser, (req, res, next) => {
     .then(results => res.send(JSON.stringify(results)))
     .catch(next);
 });
+
+/**
+ * @swagger
+ * /api/skills:
+ *   get:
+ *     tags:
+ *       - skills
+ *     produces:
+ *       - application/json
+ *     description: Returns list of all skills
+ *     responses:
+ *       200:
+ *         description: success response
+ *         schema:
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/tags'
+ *       404:
+ *         description: no tags found
+ *         schema:
+ *           $ref: '#/definitions/error'
+ *
+ */
+
+router.get("/api/skills", (req, res, next) => {
+  return skills
+    .fetchAll()
+    .then(results => res.send(JSON.stringify(results)))
+    .catch(next);
+});

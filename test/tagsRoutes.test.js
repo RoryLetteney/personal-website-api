@@ -161,11 +161,11 @@ describe("tags-routes", () => {
         });
     });
 
-    it("should return status 500 when the tag to update is not found", () => {
+    it("should return status 404 when the tag to update is not found", () => {
       return request
         .put("/api/tags/0")
         .send({ name: "test-tag-update" })
-        .expect(500)
+        .expect(404)
         .expect(res => {
           expect(res.text).to.be.a("string");
 
@@ -175,7 +175,7 @@ describe("tags-routes", () => {
           expect(response).to.have.own.property("error");
           expect(response.error)
             .to.have.own.property("status")
-            .and.to.equal(500);
+            .and.to.equal(404);
           expect(response.error)
             .to.have.own.property("message")
             .and.to.be.a("string");
@@ -209,7 +209,7 @@ describe("tags-routes", () => {
           expect(response).to.have.own.property("error");
           expect(response.error)
             .to.have.own.property("status")
-            .and.to.equal(500);
+            .and.to.equal(404);
           expect(response.error)
             .to.have.own.property("message")
             .and.to.be.a("string");
@@ -237,10 +237,10 @@ describe("tags-routes", () => {
         });
     });
 
-    it("should return status 500 when the tag to delete is not found", () => {
+    it("should return status 404 when the tag to delete is not found", () => {
       return request
         .delete("/api/tags/0")
-        .expect(500)
+        .expect(404)
         .expect(res => {
           expect(res.text).to.be.a("string");
 
@@ -250,7 +250,7 @@ describe("tags-routes", () => {
           expect(response).to.have.own.property("error");
           expect(response.error)
             .to.have.own.property("status")
-            .and.to.equal(500);
+            .and.to.equal(404);
           expect(response.error)
             .to.have.own.property("message")
             .and.to.be.a("string");
