@@ -6,7 +6,7 @@ const { expect } = require("chai");
 
 const testHelpers = require("./testHelpers");
 
-describe.only("skills-routes", () => {
+describe("skills-routes", () => {
   describe("POST /api/skills", () => {
     let createdSkillIds;
 
