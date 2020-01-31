@@ -286,4 +286,84 @@ describe("skills-routes", () => {
         });
     });
   });
+
+  describe("DELETE /api/skills/:id", () => {
+    let createdSkillId;
+
+    before(() => {
+      return request
+        .post("/api/skills")
+        .send({ skills: [{ name: "test-skill-1" }] })
+        .then(res => (createdSkillId = JSON.parse(res.text)[0].id));
+    });
+
+    it("should return 200 and list of the remaining skills", () => {
+      return request
+        .delete(`/api/skills/${createdSkillId}`)
+        .expect(200)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          if (Array.isArray(response)) {
+            expect(response).to.be.an("array");
+            expect(response[0]).to.be.an("object");
+            expect(response[0]).to.have.own.property("id");
+            expect(response[0]).to.have.own.property("name");
+            expect(response[0]).to.have.own.property("example");
+            expect(response[0]).to.have.own.property("start_date");
+          } else if (typeof response === "object") {
+            expect(response).to.be.an("object");
+            expect(response).to.have.own.property("error");
+            expect(response.error)
+              .to.have.own.property("status")
+              .and.to.equal(404);
+            expect(response.error)
+              .to.have.own.property("message")
+              .and.to.be.a("string");
+          }
+        });
+    });
+
+    it("should return 400 if sent an invalid id", () => {
+      return request
+        .delete("/api/skills/invalid")
+        .expect(400)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response).to.be.an("object");
+          expect(response).to.have.own.property("error");
+          expect(response.error)
+            .to.have.own.property("status")
+            .and.to.equal(400);
+          expect(response.error)
+            .to.have.own.property("message")
+            .and.to.be.a("string");
+        });
+    });
+
+    it("should return 404 if sent an id of a row that isn't found", () => {
+      return request
+        .delete("/api/skills/0")
+        .expect(404)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response).to.be.an("object");
+          expect(response).to.have.own.property("error");
+          expect(response.error)
+            .to.have.own.property("status")
+            .and.to.equal(404);
+          expect(response.error)
+            .to.have.own.property("message")
+            .and.to.be.a("string");
+        });
+    });
+  });
 });
