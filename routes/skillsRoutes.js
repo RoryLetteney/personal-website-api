@@ -21,6 +21,8 @@ const skills = require("../models/skills");
  *         type: string
  *       start_date:
  *         type: string
+ *       tags:
+ *         type: array
  *   error:
  *     type: object
  *     properties:
@@ -67,6 +69,10 @@ const skills = require("../models/skills");
  *                     type: string
  *                     required: false
  *                     description: date skill was acquired, formatted YYYY-MM-DD
+ *                   tag_ids:
+ *                     type: string
+ *                     required: false
+ *                     description: comma separated list of tag ids
  *     responses:
  *       200:
  *         description: success response

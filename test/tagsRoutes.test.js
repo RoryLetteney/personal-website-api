@@ -11,7 +11,7 @@ describe("tags-routes", () => {
     let createdTagId;
 
     after(() => {
-      return testHelpers.tags.cleanup.create(createdTagId);
+      return testHelpers.tags.cleanup.create([createdTagId]);
     });
 
     it("should return status 200 and newly created tag", () => {
@@ -66,7 +66,7 @@ describe("tags-routes", () => {
     });
 
     after(() => {
-      return testHelpers.tags.cleanup.create(createdTagId);
+      return testHelpers.tags.cleanup.create([createdTagId]);
     });
 
     it("should return status 200 and a list of tags", () => {
@@ -97,7 +97,7 @@ describe("tags-routes", () => {
     });
 
     after(() => {
-      return testHelpers.tags.cleanup.create(createdTagId);
+      return testHelpers.tags.cleanup.create([createdTagId]);
     });
 
     it("should return status 200 and the updated tag", () => {
