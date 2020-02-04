@@ -175,6 +175,9 @@ describe("skills-routes", () => {
           expect(response[0]).to.have.own.property("name");
           expect(response[0]).to.have.own.property("example");
           expect(response[0]).to.have.own.property("start_date");
+          expect(response[0])
+            .to.have.own.property("tags")
+            .and.to.have.lengthOf(0);
         });
     });
 
