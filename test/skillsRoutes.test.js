@@ -241,7 +241,7 @@ describe("skills-routes", () => {
           name: "test-skill-1-updated",
           example: "test-example-1",
           start_date: "2015-01-01",
-          tag_ids: createdTagIds.join(",")
+          add_tag_ids: createdTagIds.join(",")
         })
         .expect(200)
         .expect(res => {

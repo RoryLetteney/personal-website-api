@@ -153,7 +153,7 @@ router.get("/api/skills", (req, res, next) => {
  *             start_date:
  *               type: string
  *               required: false
- *             tag_ids:
+ *             add_tag_ids:
  *               type: string
  *               required: false
  *               description: comma separated string of tag ids

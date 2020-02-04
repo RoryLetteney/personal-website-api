@@ -11,11 +11,19 @@ module.exports = {
 
     const query = `
       SELECT
-        id
-        ,name
-        ,example
-        ,TO_CHAR(start_date :: DATE, 'YYYY-MM-DD') AS start_date
-      FROM skills
+        S.id
+        ,S.name
+        ,S.example
+        ,TO_CHAR(S.start_date :: DATE, 'YYYY-MM-DD') AS start_date
+        ,ARRAY(
+          SELECT T.name
+          FROM tags T
+          LEFT JOIN skills_tags_assignments STA
+            ON STA.tag_id = T.id
+            AND STA.skill_id = S.id
+          WHERE STA.skill_id = S.id
+        ) AS tags
+      FROM skills S
     `;
 
     return client
@@ -139,7 +147,10 @@ module.exports = {
 
     return client
       .query(queryReturn, valuesReturn)
-      .then(results => Promise.resolve(results.rows))
+      .then(results => {
+        client.release();
+        return Promise.resolve(results.rows);
+      })
       .catch(err =>
         Promise.reject(
           createError(
@@ -150,7 +161,7 @@ module.exports = {
       );
   },
   update: async paramObj => {
-    const { id, name, example, start_date } = paramObj;
+    const { id, name, example, start_date, add_tag_ids } = paramObj;
 
     if (id === null || id === undefined || !verifyNumber(id))
       return Promise.reject(createError(400, "Must provide a valid id"));
@@ -158,27 +169,28 @@ module.exports = {
     if (
       (!name || !verifyString(name)) &&
       (!example || !verifyString(example)) &&
-      (!start_date || !verifyString(start_date))
+      (!start_date || !verifyString(start_date)) &&
+      (!add_tag_ids || !verifyString(add_tag_ids))
     )
       return Promise.reject(
         createError(
           400,
-          "Must provide at least one of the parameters (name, example, start_date)"
+          "Must provide at least one of the parameters (name, example, start_date, add_tag_ids)"
         )
       );
 
     let nameClause = "";
     let exampleClause = "";
     let startDateClause = "";
-    let values = [id];
+    let valuesSkills = [id];
 
     if (name) {
       nameClause = "name = $2";
-      values.push(name);
+      valuesSkills.push(name);
     }
     if (example) {
       exampleClause = name ? ",example = $3" : "example = $2";
-      values.push(example);
+      valuesSkills.push(example);
     }
     if (start_date) {
       startDateClause =
@@ -187,23 +199,72 @@ module.exports = {
           : (name && !example) || (!name && example)
           ? ",start_date = $3"
           : "start_date = $2";
-      values.push(start_date);
+      valuesSkills.push(start_date);
     }
 
-    const query = `
+    const querySkills = `
       UPDATE skills
       SET ${nameClause}${exampleClause}${startDateClause}
       WHERE id = $1
-      RETURNING
-        id
-        ,name
-        ,example
-        ,TO_CHAR(start_date :: DATE, 'YYYY-MM-DD') AS start_date
     `;
 
     const client = await database.connect();
+
+    await client
+      .query(querySkills, valuesSkills)
+      .then(() => {
+        let valuesSkillsTagsAssignments = [];
+        let splitAddTagIds = add_tag_ids
+          ? add_tag_ids.split(",").map(ti => parseInt(ti))
+          : null;
+        if (splitAddTagIds) {
+          let querySkillsTagsAssignments = `
+            INSERT INTO skills_tags_assignments (skill_id, tag_id)
+            VALUES 
+          `;
+
+          for (let s = 0; s < splitAddTagIds.length; s++) {
+            valuesSkillsTagsAssignments.push(id, splitAddTagIds[s]);
+            querySkillsTagsAssignments += `($${valuesSkillsTagsAssignments.length -
+              1},$${valuesSkillsTagsAssignments.length}),`;
+          }
+
+          return client.query(
+            querySkillsTagsAssignments.slice(0, -1),
+            valuesSkillsTagsAssignments
+          );
+        }
+      })
+      .catch(err => {
+        return Promise.reject(
+          createError(
+            err.status || 500,
+            err.message || `skills.create SQL Error: ${err}`
+          )
+        );
+      });
+
+    const queryReturn = `
+        SELECT
+          S.id
+          ,S.name
+          ,S.example
+          ,TO_CHAR(S.start_date :: DATE, 'YYYY-MM-DD') AS start_date
+          ,ARRAY(
+            SELECT T.name
+            FROM tags T
+            LEFT JOIN skills_tags_assignments STA
+              ON STA.tag_id = T.id
+              AND STA.skill_id = S.id
+            WHERE STA.skill_id = S.id
+          ) AS tags
+        FROM skills S
+        WHERE S.id = $1
+      `;
+    const valuesReturn = [id];
+
     return client
-      .query(query, values)
+      .query(queryReturn, valuesReturn)
       .then(results => {
         client.release();
 
