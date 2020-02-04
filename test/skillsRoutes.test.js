@@ -200,8 +200,27 @@ describe("skills-routes", () => {
 
   describe("PUT /api/skills/:id", () => {
     let createdSkillId;
+    let createdTagIds = [];
 
-    before(() => {
+    before(async () => {
+      await request
+        .post("/api/tags")
+        .send({ name: "test-tag-1" })
+        .then(res => {
+          createdTagIds.push(JSON.parse(res.text)[0].id);
+        });
+      await request
+        .post("/api/tags")
+        .send({ name: "test-tag-2" })
+        .then(res => {
+          createdTagIds.push(JSON.parse(res.text)[0].id);
+        });
+      await request
+        .post("/api/tags")
+        .send({ name: "test-tag-3" })
+        .then(res => {
+          createdTagIds.push(JSON.parse(res.text)[0].id);
+        });
       return request
         .post("/api/skills")
         .send({
@@ -211,6 +230,7 @@ describe("skills-routes", () => {
     });
 
     after(() => {
+      testHelpers.tags.cleanup.create(createdTagIds);
       return testHelpers.skills.cleanup.create([createdSkillId]);
     });
 
@@ -220,7 +240,8 @@ describe("skills-routes", () => {
         .send({
           name: "test-skill-1-updated",
           example: "test-example-1",
-          start_date: "2015-01-01"
+          start_date: "2015-01-01",
+          tag_ids: createdTagIds.join(",")
         })
         .expect(200)
         .expect(res => {
@@ -242,6 +263,9 @@ describe("skills-routes", () => {
           expect(response[0])
             .to.have.own.property("start_date")
             .and.to.equal("2015-01-01");
+          expect(response[0])
+            .to.have.own.property("tags")
+            .and.to.deep.equal(["test-tag-1", "test-tag-2", "test-tag-3"]);
         });
     });
 

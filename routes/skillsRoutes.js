@@ -153,6 +153,10 @@ router.get("/api/skills", (req, res, next) => {
  *             start_date:
  *               type: string
  *               required: false
+ *             tag_ids:
+ *               type: string
+ *               required: false
+ *               description: comma separated string of tag ids
  *     responses:
  *       200:
  *         description: success response
