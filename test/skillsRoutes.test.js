@@ -175,6 +175,9 @@ describe("skills-routes", () => {
           expect(response[0]).to.have.own.property("name");
           expect(response[0]).to.have.own.property("example");
           expect(response[0]).to.have.own.property("start_date");
+          expect(response[0])
+            .to.have.own.property("tags")
+            .and.to.have.lengthOf(0);
         });
     });
 
@@ -200,8 +203,27 @@ describe("skills-routes", () => {
 
   describe("PUT /api/skills/:id", () => {
     let createdSkillId;
+    let createdTagIds = [];
 
-    before(() => {
+    before(async () => {
+      await request
+        .post("/api/tags")
+        .send({ name: "test-tag-1" })
+        .then(res => {
+          createdTagIds.push(JSON.parse(res.text)[0].id);
+        });
+      await request
+        .post("/api/tags")
+        .send({ name: "test-tag-2" })
+        .then(res => {
+          createdTagIds.push(JSON.parse(res.text)[0].id);
+        });
+      await request
+        .post("/api/tags")
+        .send({ name: "test-tag-3" })
+        .then(res => {
+          createdTagIds.push(JSON.parse(res.text)[0].id);
+        });
       return request
         .post("/api/skills")
         .send({
@@ -211,6 +233,7 @@ describe("skills-routes", () => {
     });
 
     after(() => {
+      testHelpers.tags.cleanup.create(createdTagIds);
       return testHelpers.skills.cleanup.create([createdSkillId]);
     });
 
@@ -220,7 +243,8 @@ describe("skills-routes", () => {
         .send({
           name: "test-skill-1-updated",
           example: "test-example-1",
-          start_date: "2015-01-01"
+          start_date: "2015-01-01",
+          add_tag_ids: createdTagIds.join(",")
         })
         .expect(200)
         .expect(res => {
@@ -242,6 +266,41 @@ describe("skills-routes", () => {
           expect(response[0])
             .to.have.own.property("start_date")
             .and.to.equal("2015-01-01");
+          expect(response[0])
+            .to.have.own.property("tags")
+            .and.to.deep.equal(["test-tag-1", "test-tag-2", "test-tag-3"]);
+        });
+    });
+
+    it("should return 200 and updated skill: remove_tag_ids", () => {
+      return request
+        .put(`/api/skills/${createdSkillId}`)
+        .send({
+          remove_tag_ids: createdTagIds.join(",")
+        })
+        .expect(200)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response).to.be.an("array");
+          expect(response[0]).to.be.an("object");
+          expect(response[0])
+            .to.have.own.property("id")
+            .and.to.equal(createdSkillId);
+          expect(response[0])
+            .to.have.own.property("name")
+            .and.to.equal("test-skill-1-updated");
+          expect(response[0])
+            .to.have.own.property("example")
+            .and.to.equal("test-example-1");
+          expect(response[0])
+            .to.have.own.property("start_date")
+            .and.to.equal("2015-01-01");
+          expect(response[0])
+            .to.have.own.property("tags")
+            .and.to.deep.equal([]);
         });
     });
 

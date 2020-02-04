@@ -15,7 +15,7 @@ const swaggerDefinition = {
     version: "1.0.0",
     description: "API docs for letteney.software"
   },
-  basePath: "/api/"
+  basePath: "/"
 };
 const swaggerOptions = {
   swaggerDefinition,
