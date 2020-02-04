@@ -9,8 +9,31 @@ const testHelpers = require("./testHelpers");
 describe("skills-routes", () => {
   describe("POST /api/skills", () => {
     let createdSkillIds;
+    let createdTagIds = [];
+
+    before(async () => {
+      await request
+        .post("/api/tags")
+        .send({ name: "test-tag-1" })
+        .then(res => {
+          createdTagIds.push(JSON.parse(res.text)[0].id);
+        });
+      await request
+        .post("/api/tags")
+        .send({ name: "test-tag-2" })
+        .then(res => {
+          createdTagIds.push(JSON.parse(res.text)[0].id);
+        });
+      return request
+        .post("/api/tags")
+        .send({ name: "test-tag-3" })
+        .then(res => {
+          createdTagIds.push(JSON.parse(res.text)[0].id);
+        });
+    });
 
     after(() => {
+      testHelpers.tags.cleanup.create(createdTagIds);
       return testHelpers.skills.cleanup.create(createdSkillIds);
     });
 
@@ -34,7 +57,7 @@ describe("skills-routes", () => {
             },
             {
               name: "test-skill-4",
-              tags: "1,2"
+              tag_ids: createdTagIds.slice(0, 2).join(",")
             }
           ]
         })
@@ -51,8 +74,13 @@ describe("skills-routes", () => {
           expect(response[0]).to.have.own.property("name");
           expect(response[0]).to.have.own.property("example");
           expect(response[0]).to.have.own.property("start_date");
-          expect(response[0]).to.have.own.property("tags").and.to.equal([]);
-          expect(response[3]).to.have.own.property("tags").and.to.equal([1,2]);
+          expect(response[0])
+            .to.have.own.property("tags")
+            .and.to.be.an("array")
+            .and.to.have.lengthOf(0);
+          expect(response[3])
+            .to.have.own.property("tags")
+            .and.to.deep.equal(["test-tag-1", "test-tag-2"]);
         });
     });
 

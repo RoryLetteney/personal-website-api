@@ -6,14 +6,14 @@ const database = require("../database");
 module.exports = {
   tags: {
     cleanup: {
-      create: async id => {
+      create: async ids => {
         const client = await database.connect();
 
         const query = `
           DELETE FROM tags
-          WHERE id = $1
+          WHERE id IN (${ids.map((_, idx) => `$${idx + 1}`).join(",")})
         `;
-        const values = [id];
+        const values = [...ids];
 
         return client
           .query(query, values)

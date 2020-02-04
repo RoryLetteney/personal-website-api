@@ -46,13 +46,13 @@ module.exports = {
       );
 
     const client = await database.connect();
-    let promiseArray = [];
+    const newSkillIds = [];
 
     for (let i = 0; i < skills.length; i++) {
-      const { name, example, start_date } = skills[i];
+      const { name, example, start_date, tag_ids } = skills[i];
 
       const columns = ["name", "example", "start_date"];
-      let values = [];
+      let valuesSkills = [];
 
       if (!name || !verifyString(name)) {
         client.release();
@@ -62,40 +62,84 @@ module.exports = {
             "Name must be supplied for each skill and must be a string"
           )
         );
-      } else values.push(name.toLowerCase());
+      } else valuesSkills.push(name.toLowerCase());
 
       if (example && !verifyString(example)) {
         client.release();
         return Promise.reject(createError(400, "Example must be a string"));
-      } else if (example) values.push(example);
+      } else if (example) valuesSkills.push(example);
 
       if (start_date && !verifyString(start_date)) {
         client.release();
         return Promise.reject(createError(400, "Start date must be a string"));
-      } else if (start_date) values.push(start_date);
+      } else if (start_date) valuesSkills.push(start_date);
 
-      const query = `
-        INSERT INTO skills (${columns.slice(0, values.length).join(",")})
-        VALUES (${values.map((_, idx) => `$${idx + 1}`).join(",")})
-        RETURNING 
-          id
-          ,name
-          ,example
-          ,TO_CHAR(start_date :: DATE, 'YYYY-MM-DD') AS start_date
+      const querySkills = `
+        INSERT INTO skills (${columns.slice(0, valuesSkills.length).join(",")})
+        VALUES (${valuesSkills.map((_, idx) => `$${idx + 1}`).join(",")})
+        RETURNING id
       `;
 
-      promiseArray.push(client.query(query, values));
+      await client
+        .query(querySkills, valuesSkills)
+        .then(results => {
+          const skillId = results.rows[0].id;
+          newSkillIds.push(skillId);
+
+          let valuesSkillsTagsAssignments = [];
+          let splitTagIds = tag_ids
+            ? tag_ids.split(",").map(ti => parseInt(ti))
+            : null;
+          if (splitTagIds) {
+            let querySkillsTagsAssignments = `
+              INSERT INTO skills_tags_assignments (skill_id, tag_id)
+              VALUES 
+            `;
+
+            for (let s = 0; s < splitTagIds.length; s++) {
+              valuesSkillsTagsAssignments.push(skillId, splitTagIds[s]);
+              querySkillsTagsAssignments += `($${valuesSkillsTagsAssignments.length -
+                1},$${valuesSkillsTagsAssignments.length}),`;
+            }
+
+            return client.query(
+              querySkillsTagsAssignments.slice(0, -1),
+              valuesSkillsTagsAssignments
+            );
+          }
+        })
+        .catch(err => {
+          return Promise.reject(
+            createError(
+              err.status || 500,
+              err.message || `skills.create SQL Error: ${err}`
+            )
+          );
+        });
     }
 
-    return Promise.all(promiseArray)
-      .then(results => {
-        client.release();
-        return results.reduce((acc, curr) => {
-          acc.push(...curr.rows);
-          return acc;
-        }, []);
-      })
-      .then(results => Promise.resolve(results))
+    const queryReturn = `
+      SELECT
+        S.id
+        ,S.name
+        ,S.example
+        ,TO_CHAR(S.start_date :: DATE, 'YYYY-MM-DD') AS start_date
+        ,ARRAY(
+          SELECT T.name
+          FROM tags T
+          LEFT JOIN skills_tags_assignments STA
+            ON STA.tag_id = T.id
+            AND STA.skill_id = S.id
+          WHERE STA.skill_id = S.id
+        ) AS tags
+      FROM skills S
+      WHERE S.id IN (${newSkillIds.map((_, idx) => `$${idx + 1}`).join(",")})
+    `;
+    const valuesReturn = newSkillIds;
+
+    return client
+      .query(queryReturn, valuesReturn)
+      .then(results => Promise.resolve(results.rows))
       .catch(err =>
         Promise.reject(
           createError(
