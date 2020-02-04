@@ -33,7 +33,8 @@ describe("skills-routes", () => {
               start_date: "2015-01-01"
             },
             {
-              name: "test-skill-4"
+              name: "test-skill-4",
+              tags: "1,2"
             }
           ]
         })
@@ -42,6 +43,7 @@ describe("skills-routes", () => {
           expect(res.text).to.be.a("string");
 
           const response = JSON.parse(res.text);
+          createdSkillIds = response.map(i => i.id);
 
           expect(response).to.be.an("array");
           expect(response[0]).to.be.an("object");
@@ -49,8 +51,8 @@ describe("skills-routes", () => {
           expect(response[0]).to.have.own.property("name");
           expect(response[0]).to.have.own.property("example");
           expect(response[0]).to.have.own.property("start_date");
-
-          createdSkillIds = response.map(i => i.id);
+          expect(response[0]).to.have.own.property("tags").and.to.equal([]);
+          expect(response[3]).to.have.own.property("tags").and.to.equal([1,2]);
         });
     });
 
