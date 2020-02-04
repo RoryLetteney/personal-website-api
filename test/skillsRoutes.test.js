@@ -272,6 +272,38 @@ describe("skills-routes", () => {
         });
     });
 
+    it("should return 200 and updated skill: remove_tag_ids", () => {
+      return request
+        .put(`/api/skills/${createdSkillId}`)
+        .send({
+          remove_tag_ids: createdTagIds.join(",")
+        })
+        .expect(200)
+        .expect(res => {
+          expect(res.text).to.be.a("string");
+
+          const response = JSON.parse(res.text);
+
+          expect(response).to.be.an("array");
+          expect(response[0]).to.be.an("object");
+          expect(response[0])
+            .to.have.own.property("id")
+            .and.to.equal(createdSkillId);
+          expect(response[0])
+            .to.have.own.property("name")
+            .and.to.equal("test-skill-1-updated");
+          expect(response[0])
+            .to.have.own.property("example")
+            .and.to.equal("test-example-1");
+          expect(response[0])
+            .to.have.own.property("start_date")
+            .and.to.equal("2015-01-01");
+          expect(response[0])
+            .to.have.own.property("tags")
+            .and.to.deep.equal([]);
+        });
+    });
+
     it("should return 400 if sent an invalid id", () => {
       return request
         .put("/api/skills/invalid")

@@ -161,7 +161,14 @@ module.exports = {
       );
   },
   update: async paramObj => {
-    const { id, name, example, start_date, add_tag_ids } = paramObj;
+    const {
+      id,
+      name,
+      example,
+      start_date,
+      add_tag_ids,
+      remove_tag_ids
+    } = paramObj;
 
     if (id === null || id === undefined || !verifyNumber(id))
       return Promise.reject(createError(400, "Must provide a valid id"));
@@ -170,12 +177,13 @@ module.exports = {
       (!name || !verifyString(name)) &&
       (!example || !verifyString(example)) &&
       (!start_date || !verifyString(start_date)) &&
-      (!add_tag_ids || !verifyString(add_tag_ids))
+      (!add_tag_ids || !verifyString(add_tag_ids)) &&
+      (!remove_tag_ids || !verifyString(remove_tag_ids))
     )
       return Promise.reject(
         createError(
           400,
-          "Must provide at least one of the parameters (name, example, start_date, add_tag_ids)"
+          "Must provide at least one of the parameters (name, example, start_date, add_tag_ids, remove_tag_ids)"
         )
       );
 
@@ -210,32 +218,8 @@ module.exports = {
 
     const client = await database.connect();
 
-    await client
-      .query(querySkills, valuesSkills)
-      .then(() => {
-        let valuesSkillsTagsAssignments = [];
-        let splitAddTagIds = add_tag_ids
-          ? add_tag_ids.split(",").map(ti => parseInt(ti))
-          : null;
-        if (splitAddTagIds) {
-          let querySkillsTagsAssignments = `
-            INSERT INTO skills_tags_assignments (skill_id, tag_id)
-            VALUES 
-          `;
-
-          for (let s = 0; s < splitAddTagIds.length; s++) {
-            valuesSkillsTagsAssignments.push(id, splitAddTagIds[s]);
-            querySkillsTagsAssignments += `($${valuesSkillsTagsAssignments.length -
-              1},$${valuesSkillsTagsAssignments.length}),`;
-          }
-
-          return client.query(
-            querySkillsTagsAssignments.slice(0, -1),
-            valuesSkillsTagsAssignments
-          );
-        }
-      })
-      .catch(err => {
+    if (name || example || start_date)
+      await client.query(querySkills, valuesSkills).catch(err => {
         return Promise.reject(
           createError(
             err.status || 500,
@@ -243,6 +227,48 @@ module.exports = {
           )
         );
       });
+
+    let valuesSkillsTagsAssignments = [];
+    let splitAddTagIds = add_tag_ids
+      ? add_tag_ids.split(",").map(ti => parseInt(ti))
+      : null;
+    let splitRemoveTagIds = remove_tag_ids
+      ? remove_tag_ids.split(",").map(ti => parseInt(ti))
+      : null;
+    if (splitAddTagIds) {
+      let querySkillsTagsAssignments = `
+          INSERT INTO skills_tags_assignments (skill_id, tag_id)
+          VALUES 
+        `;
+
+      for (let s = 0; s < splitAddTagIds.length; s++) {
+        valuesSkillsTagsAssignments.push(id, splitAddTagIds[s]);
+        querySkillsTagsAssignments += `($${valuesSkillsTagsAssignments.length -
+          1},$${valuesSkillsTagsAssignments.length}),`;
+      }
+
+      await client.query(
+        querySkillsTagsAssignments.slice(0, -1),
+        valuesSkillsTagsAssignments
+      );
+    }
+
+    if (splitRemoveTagIds) {
+      let querySkillsTagsAssignments =
+        `
+          DELETE FROM skills_tags_assignments
+          WHERE skill_id = $1
+            AND tag_id IN (` +
+        splitRemoveTagIds.map((_, idx) => `$${idx + 2}`).join(",") +
+        `)
+        `;
+      let valuesRemoveSkillsTagsAssignments = [id, ...splitRemoveTagIds];
+
+      await client.query(
+        querySkillsTagsAssignments,
+        valuesRemoveSkillsTagsAssignments
+      );
+    }
 
     const queryReturn = `
         SELECT

@@ -23,6 +23,8 @@ const skills = require("../models/skills");
  *         type: string
  *       tags:
  *         type: array
+ *         items:
+ *           type: string
  *   error:
  *     type: object
  *     properties:
@@ -125,7 +127,7 @@ router.get("/api/skills", (req, res, next) => {
 
 /**
  * @swagger
- * /api/skills/:id:
+ * /api/skills/{id}:
  *   put:
  *     tags:
  *       - skills
@@ -156,7 +158,11 @@ router.get("/api/skills", (req, res, next) => {
  *             add_tag_ids:
  *               type: string
  *               required: false
- *               description: comma separated string of tag ids
+ *               description: comma separated string of tag ids to assign
+ *             remove_tag_ids:
+ *               type: string
+ *               required: false
+ *               description: comma separated string of tag ids to unassign
  *     responses:
  *       200:
  *         description: success response
