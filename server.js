@@ -28,6 +28,7 @@ app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 // ROUTES
 app.use(require("./routes/tagsRoutes"));
 app.use(require("./routes/skillsRoutes"));
+app.use(require("./routes/projectRoutes"));
 
 // ERROR HANDLER
 // eslint-disable-next-line no-unused-vars

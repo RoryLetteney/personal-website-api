@@ -4,16 +4,21 @@ const createError = require("http-errors");
 const database = require("../database");
 
 module.exports = {
-  tags: {
+  projects: {
     cleanup: {
       create: async ids => {
         const client = await database.connect();
 
-        const query = `
-          DELETE FROM tags
-          WHERE id IN (${ids.map((_, idx) => `$${idx + 1}`).join(",")})
+        const inClause = ids.map((_, idx) => `$${idx + 1}`).join(",");
+
+        const query =
+          `
+          DELETE FROM projects
+          WHERE id IN (` +
+          inClause +
+          `)
         `;
-        const values = [...ids];
+        const values = ids;
 
         return client
           .query(query, values)
@@ -26,7 +31,7 @@ module.exports = {
             return Promise.reject(
               createError(
                 err.status || 500,
-                err.message || `tags.cleanup.create SQL Error: ${err}`
+                err.message || `projects.cleanup.create SQL Error: ${err}`
               )
             );
           });
@@ -45,6 +50,35 @@ module.exports = {
           WHERE id IN (${inClause})
         `;
         const values = ids;
+
+        return client
+          .query(query, values)
+          .then(() => {
+            client.release();
+            return Promise.resolve();
+          })
+          .catch(err => {
+            client.release();
+            return Promise.reject(
+              createError(
+                err.status || 500,
+                err.message || `skills.cleanup.create SQL Error: ${err}`
+              )
+            );
+          });
+      }
+    }
+  },
+  tags: {
+    cleanup: {
+      create: async ids => {
+        const client = await database.connect();
+
+        const query = `
+          DELETE FROM tags
+          WHERE id IN (${ids.map((_, idx) => `$${idx + 1}`).join(",")})
+        `;
+        const values = [...ids];
 
         return client
           .query(query, values)
