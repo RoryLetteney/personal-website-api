@@ -11,9 +11,12 @@ module.exports = {
 
         const inClause = ids.map((_, idx) => `$${idx + 1}`).join(",");
 
-        const query = `
+        const query =
+          `
           DELETE FROM projects
-          WHERE id IN (${inClause})
+          WHERE id IN (` +
+          inClause +
+          `)
         `;
         const values = ids;
 

@@ -66,18 +66,18 @@ const projects = require("../models/projects");
  *               required: true
  *             start_date:
  *               type: string
- *               required: true
+ *               required: false
  *             end_date:
  *               type: string
  *               required: false
  *             skill_ids:
  *               type: string
  *               description: Comma separated list of skill ids
- *               required: true
+ *               required: false
  *             tag_ids:
  *               type: string
  *               description: Comma separated list of tag ids
- *               required: true
+ *               required: false
  *     responses:
  *       200:
  *         description: success response

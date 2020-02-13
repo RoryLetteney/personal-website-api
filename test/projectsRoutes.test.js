@@ -7,7 +7,7 @@ const moment = require("moment");
 
 const testHelpers = require("./testHelpers");
 
-describe.only("projects-routes", () => {
+describe("projects-routes", () => {
   describe("POST /api/projects", () => {
     let createdProjectIds = [];
     let createdTagIds = [];
@@ -100,44 +100,6 @@ describe.only("projects-routes", () => {
               "test-skill-2",
               "test-skill-3"
             ]);
-        });
-    });
-
-    it("should return 200 and the newly created project with only the necessary information", () => {
-      return request
-        .post("/api/projects")
-        .send({
-          name: "test-project-2",
-          description: "This is a test project."
-        })
-        .expect(200)
-        .expect(res => {
-          expect(res.text).to.be.a("string");
-
-          const response = JSON.parse(res.text);
-          createdProjectIds.push(response[0].id);
-
-          expect(response).to.be.an("array");
-          expect(response[0]).to.be.an("object");
-          expect(response[0]).to.have.own.property("id");
-          expect(response[0])
-            .to.have.own.property("name")
-            .and.to.equal("test-project-2");
-          expect(response[0])
-            .to.have.own.property("description")
-            .and.to.equal("This is a test project.");
-          expect(response[0])
-            .to.have.own.property("start_date")
-            .and.to.equal(moment().format("YYYY-MM-DD"));
-          expect(response[0])
-            .to.have.own.property("end_date")
-            .and.to.equal(null);
-          expect(response[0])
-            .to.have.own.property("tags")
-            .and.to.have.lengthOf(0);
-          expect(response[0])
-            .to.have.own.property("skills")
-            .and.to.have.lengthOf(0);
         });
     });
 
